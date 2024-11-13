@@ -151,7 +151,8 @@ if st.sidebar.button("مسح الجلسات"):
         st.error("فشل في مسح الجلسات.")
 
 st.sidebar.header("""
-<div class='sidebar-rtl'>":طريقة الاستخدام"</div>
+<div class='sidebar-rtl'>
+:طريقة الاستخدام</div>
 """, unsafe_allow_html=True)
 # الشريط الجانبي - إرشادات الاستخدام والتنويه
 st.sidebar.markdown("""
