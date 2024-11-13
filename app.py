@@ -150,11 +150,12 @@ if st.sidebar.button("مسح الجلسات"):
     else:
         st.error("فشل في مسح الجلسات.")
 
-
+st.sidebar.header("""
+<div class='sidebar-rtl'>":طريقة الاستخدام"</div>
+""", unsafe_allow_html=True)
 # الشريط الجانبي - إرشادات الاستخدام والتنويه
 st.sidebar.markdown("""
 <div class='sidebar-rtl'>
-: طريقة الاستخدام
 - اختر المادة المطلوبة من الصفحة الرئيسية.<br>
 - اكتب سؤالك للحصول على الإجابة.<br>
 - يمكنك توليد اختبار يحتوي على أسئلة متنوعة بعد الاستفسار.<br>
