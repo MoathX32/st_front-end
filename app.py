@@ -30,16 +30,15 @@ st.title("مساعد التعلم بالذكاء الاصطناعي")
 
 # Step 1: Subject Selection
 subject_map = {
-    "اللغة العربية": 314,
-    "الرياضيات": 315,
-    "العلوم": 316
+    "اللغة العربية": 314
+
 }
 
 # Display subject options as large clickable buttons
 st.markdown("<div class='rtl-text'>اختر مادة للبدء:</div>", unsafe_allow_html=True)
 
 # Using Streamlit's columns to display buttons in a row
-col1, col2, col3 = st.columns(3)
+col1 = st.columns(1)
 
 # Initialize variables
 selected_subject = None
@@ -49,16 +48,6 @@ course_id = None
 with col1:
     if st.button("اللغة العربية", key="arabic", help="اختر مادة اللغة العربية"):
         selected_subject = "اللغة العربية"
-        course_id = subject_map[selected_subject]
-
-with col2:
-    if st.button("الرياضيات", key="math", help="اختر مادة الرياضيات"):
-        selected_subject = "الرياضيات"
-        course_id = subject_map[selected_subject]
-
-with col3:
-    if st.button("العلوم", key="science", help="اختر مادة العلوم"):
-        selected_subject = "العلوم"
         course_id = subject_map[selected_subject]
 
 # Start session automatically if a subject button is clicked
