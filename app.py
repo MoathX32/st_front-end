@@ -28,15 +28,40 @@ st.markdown("""
 # واجهة المستخدم
 st.title("مساعد التعلم بالذكاء الاصطناعي")
 
-# عرض خيار المادة (اللغة العربية فقط)
+# عرض خيارات المواد
+subject_map = {
+    "اللغة العربية": 314,
+    "التربية الإسلامية": 333,
+    "الفلسفة": 335
+}
+
 st.markdown("<div class='rtl-text'>اختر مادة للبدء:</div>", unsafe_allow_html=True)
 
-# زر اختيار اللغة العربية
-if st.button("اللغة العربية", key="arabic"):
-    selected_subject = "اللغة العربية"
-    course_id = 314  # رقم المادة للغة العربية
+# استخدام أعمدة لعرض الأزرار بشكل متناسق
+col1, col2, col3 = st.columns(3)
 
-    # بدء الجلسة
+# تهيئة المتغيرات
+selected_subject = None
+course_id = None
+
+# التعامل مع ضغط الأزرار لكل مادة
+with col1:
+    if st.button("اللغة العربية", key="arabic"):
+        selected_subject = "اللغة العربية"
+        course_id = subject_map[selected_subject]
+
+with col2:
+    if st.button("التربية الإسلامية", key="islamic"):
+        selected_subject = "التربية الإسلامية"
+        course_id = subject_map[selected_subject]
+
+with col3:
+    if st.button("الفلسفة", key="philosophy"):
+        selected_subject = "الفلسفة"
+        course_id = subject_map[selected_subject]
+
+# بدء الجلسة تلقائيًا عند اختيار المادة
+if selected_subject and course_id:
     payload = {
         "courseId": course_id,
         "studentId": STUDENT_ID
