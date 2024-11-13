@@ -2,13 +2,13 @@ import streamlit as st
 import requests
 import json
 
-# FastAPI backend URL
+# رابط واجهة FastAPI الخلفية
 BASE_URL = "http://57.128.91.158"
 
-# User information (student ID)
+# معلومات المستخدم (رقم الطالب)
 STUDENT_ID = "500"
 
-# Custom CSS for right-aligned Arabic content
+# تنسيق النص العربي لليمين
 st.markdown("""
     <style>
     .rtl-text {
@@ -25,33 +25,18 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Streamlit UI
+# واجهة المستخدم
 st.title("مساعد التعلم بالذكاء الاصطناعي")
 
-# Step 1: Subject Selection
-subject_map = {
-    "اللغة العربية": 314
-
-}
-
-# Display subject options as large clickable buttons
+# عرض خيار المادة (اللغة العربية فقط)
 st.markdown("<div class='rtl-text'>اختر مادة للبدء:</div>", unsafe_allow_html=True)
 
-# Using Streamlit's columns to display buttons in a row
-col1 = st.columns(1)
+# زر اختيار اللغة العربية
+if st.button("اللغة العربية", key="arabic"):
+    selected_subject = "اللغة العربية"
+    course_id = 314  # رقم المادة للغة العربية
 
-# Initialize variables
-selected_subject = None
-course_id = None
-
-# Handle button clicks for each subject
-with col1:
-    if st.button("اللغة العربية", key="arabic", help="اختر مادة اللغة العربية"):
-        selected_subject = "اللغة العربية"
-        course_id = subject_map[selected_subject]
-
-# Start session automatically if a subject button is clicked
-if selected_subject and course_id:
+    # بدء الجلسة
     payload = {
         "courseId": course_id,
         "studentId": STUDENT_ID
@@ -69,11 +54,11 @@ if selected_subject and course_id:
         error_message = response.json().get("detail", "فشل في بدء الجلسة. حاول مرة أخرى.")
         st.error(error_message)
 
-# Check if session is active
+# التأكد من أن الجلسة نشطة
 if "session_id" in st.session_state:
     st.markdown(f"<div class='rtl-text'>استفسر عن {st.session_state['selected_subject']}:</div>", unsafe_allow_html=True)
 
-    # Step 2: Enter a query
+    # خطوة 2: إدخال السؤال
     query = st.text_input("اكتب سؤالك هنا:")
     if st.button("الحصول على إجابة"):
         query_request = {
@@ -95,12 +80,12 @@ if "session_id" in st.session_state:
         else:
             st.error(response.json().get("detail", "حدث خطأ أثناء الاستفسار."))
 
-    # Step 3: Generate Quiz (hidden until button click)
+    # خطوة 3: توليد اختبار (مخفي حتى الضغط على زر إظهار الاختبار)
     if "last_response" in st.session_state:
         if st.button("عرض قسم الاختبار"):
             st.session_state["quiz_visible"] = True
 
-    # Only display the quiz section if the button was clicked
+    # عرض قسم الاختبار فقط إذا تم الضغط على الزر
     if st.session_state.get("quiz_visible", False):
         st.markdown("<div class='rtl-text'>توليد اختبار:</div>", unsafe_allow_html=True)
         question_type = st.selectbox("اختر نوع الأسئلة:", ["اختيار من متعدد", "صح أو خطأ"])
@@ -126,7 +111,7 @@ if "session_id" in st.session_state:
             else:
                 st.error("فشل في توليد الاختبار.")
 
-# Step 4: Clear sessions (optional)
+# خطوة 4: مسح الجلسات (اختياري)
 if st.sidebar.button("مسح الجلسات"):
     clear_response = requests.post(f"{BASE_URL}/clear_sessions/")
     if clear_response.status_code == 200:
