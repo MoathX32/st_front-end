@@ -22,6 +22,11 @@ st.markdown("""
         font-size: 20px;
         margin-bottom: 20px;
     }
+    .sidebar-rtl {
+        text-align: right;
+        direction: rtl;
+        font-size: 16px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -136,16 +141,6 @@ if "session_id" in st.session_state:
             else:
                 st.error("فشل في توليد الاختبار.")
 
-# الشريط الجانبي - إرشادات الاستخدام والتنويه
-st.sidebar.header("طريقة الاستخدام")
-st.sidebar.markdown("""
-- اختر المادة المطلوبة من الصفحة الرئيسية.
-- اكتب سؤالك للحصول على الإجابة.
-- يمكنك توليد اختبار يحتوي على أسئلة متنوعة بعد الاستفسار.
-- استخدم زر "مسح الجلسات" لإعادة تعيين الجلسة إذا لزم الأمر.
-- **تنويه:** هذه النسخة تجريبية ومقدمة من EduAi لتقييم الأداء وتقديم الملاحظات.
-""")
-
 # خطوة 4: مسح الجلسات (اختياري)
 if st.sidebar.button("مسح الجلسات"):
     clear_response = requests.post(f"{BASE_URL}/clear_sessions/")
@@ -154,3 +149,18 @@ if st.sidebar.button("مسح الجلسات"):
         st.session_state.clear()
     else:
         st.error("فشل في مسح الجلسات.")
+
+
+# الشريط الجانبي - إرشادات الاستخدام والتنويه
+st.sidebar.header("طريقة الاستخدام")
+st.sidebar.markdown("""
+<div class='sidebar-rtl'>
+- اختر المادة المطلوبة من الصفحة الرئيسية.<br>
+- اكتب سؤالك للحصول على الإجابة.<br>
+- يمكنك توليد اختبار يحتوي على أسئلة متنوعة بعد الاستفسار.<br>
+- استخدم زر "مسح الجلسات" لإعادة تعيين الجلسة إذا لزم الأمر.<br>
+- **تنويه:** هذه النسخة تجريبية ومقدمة من EduAi لتقييم الأداء وتقديم الملاحظات.
+</div>
+""", unsafe_allow_html=True)
+
+
