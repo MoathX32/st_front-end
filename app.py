@@ -137,7 +137,7 @@ if "session_id" in st.session_state:
                     st.markdown(f"<div class='rtl-text'>س{str(i)}: {question['question']}</div>", unsafe_allow_html=True)
                     for choice in question['choices']:
                         st.markdown(f"<div class='rtl-text'>- {choice}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='rtl-text'>الإجابة الصحيحة: {question['correct_answer']}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='rtl-text'>الإجابة الصحيحة: {question['correct answer']}</div>", unsafe_allow_html=True)
             else:
                 st.error("فشل في توليد الاختبار.")
 
