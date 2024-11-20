@@ -6,7 +6,7 @@ import json
 BASE_URL = "http://57.128.91.158"
 
 # معلومات المستخدم (رقم الطالب)
-STUDENT_ID = "500"
+STUDENT_ID = "510"
 
 # تنسيق النص العربي لليمين
 st.markdown("""
@@ -118,7 +118,7 @@ if "session_id" in st.session_state:
     # عرض قسم الاختبار فقط إذا تم الضغط على الزر
     if st.session_state.get("quiz_visible", False):
         st.markdown("<div class='rtl-text'>توليد اختبار:</div>", unsafe_allow_html=True)
-        question_type = st.selectbox("اختر نوع الأسئلة:", ["اختيار من متعدد", "صح أو خطأ"])
+        question_type = st.selectbox("اختر نوع الأسئلة:", ["MCQ", "TF"])
         num_questions = st.slider("عدد الأسئلة:", min_value=1, max_value=10, value=5)
 
         if st.button("توليد الاختبار"):
