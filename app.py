@@ -1,165 +1,121 @@
 import streamlit as st
 import requests
-import json
 
-# رابط واجهة FastAPI الخلفية
-BASE_URL = "http://57.128.91.158"
-
-# معلومات المستخدم (رقم الطالب)
-STUDENT_ID = "510"
-
-# تنسيق النص العربي لليمين
-st.markdown("""
-    <style>
-    .rtl-text {
-        text-align: right;
-        direction: rtl;
-        font-size: 18px;
-    }
-    .large-button {
-        width: 100%;
-        height: 70px;
-        font-size: 20px;
-        margin-bottom: 20px;
-    }
-    .sidebar-rtl {
-        text-align: right;
-        direction: rtl;
-        font-size: 16px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# واجهة المستخدم
-st.title("مساعد التعلم بالذكاء الاصطناعي - الصف الأول الثانوي (الجذع المشترك)")
-
-# عرض خيارات المواد
-subject_map = {
-    "اللغة العربية": 314,
-    "التربية الإسلامية": 333,
-    "الفلسفة": 335
+# Define the API endpoints for each language
+API_ENDPOINTS = {
+    "Arabic": "https://aiar-svc.eduai.tech",
+    "English": "https://aien-svc.eduai.tech",
+    "French": "https://aifr-svc.eduai.tech",
 }
 
-st.markdown("<div class='rtl-text'>اختر مادة للبدء:</div>", unsafe_allow_html=True)
+COURSE_IDS = {
+    "Arabic": 314,
+    "English": 4,
+    "French": 3,
+}
 
-# استخدام أعمدة لعرض الأزرار بشكل متناسق
-col1, col2, col3 = st.columns(3)
+# Streamlit app starts here
+st.title("Language Learning Platform")
 
-# تهيئة المتغيرات
-selected_subject = None
-course_id = None
+# Input for student ID
+student_id = st.text_input("Enter your Student ID:", "")
 
-# التعامل مع ضغط الأزرار لكل مادة
-with col1:
-    if st.button("اللغة العربية", key="arabic"):
-        selected_subject = "اللغة العربية"
-        course_id = subject_map[selected_subject]
+if student_id:
+    st.success(f"Student ID: {student_id} accepted.")
 
-with col2:
-    if st.button("التربية الإسلامية", key="islamic"):
-        selected_subject = "التربية الإسلامية"
-        course_id = subject_map[selected_subject]
+    # Sidebar configuration
+    st.sidebar.header("Session Management")
 
-with col3:
-    if st.button("الفلسفة", key="philosophy"):
-        selected_subject = "الفلسفة"
-        course_id = subject_map[selected_subject]
+    # Subject selection in sidebar
+    subject = st.sidebar.selectbox("Choose a subject:", list(API_ENDPOINTS.keys()))
 
-# بدء الجلسة تلقائيًا عند اختيار المادة
-if selected_subject and course_id:
-    payload = {
-        "courseId": course_id,
-        "studentId": STUDENT_ID
-    }
-    response = requests.post(f"{BASE_URL}/load_path/", data=payload)
+    if subject:
+        api_url = API_ENDPOINTS[subject]
+        course_id = COURSE_IDS[subject]
+        st.sidebar.info(f"You selected {subject}.")
 
-    if response.status_code == 200:
-        st.success(f"تم بدء الجلسة بنجاح لمادة {selected_subject}!")
-        session_id = response.json().get("session_id")
-        st.session_state["session_id"] = session_id
-        st.session_state["course_id"] = course_id
-        st.session_state["selected_subject"] = selected_subject
-        st.session_state["quiz_visible"] = False
-    else:
-        error_message = response.json().get("detail", "فشل في بدء الجلسة. حاول مرة أخرى.")
-        st.error(error_message)
+        # Start session button in sidebar
+        if st.sidebar.button("Start Session"):
+            load_path_response = requests.post(
+                f"{api_url}/load_path/",
+                data={"studentId": student_id, "courseId": course_id},
+            )
+            if load_path_response.status_code == 200:
+                st.sidebar.success("Session started successfully!")
+                st.session_state["session_active"] = True
+                st.session_state["quiz_visible"] = True  # Initialize quiz visibility state
+            else:
+                st.sidebar.error("Failed to start session. Please check the API or your parameters.")
 
-# التأكد من أن الجلسة نشطة
-if "session_id" in st.session_state:
-    st.markdown(f"<div class='rtl-text'>استفسر عن {st.session_state['selected_subject']}:</div>", unsafe_allow_html=True)
+        # Clear session button in sidebar
+        if st.sidebar.button("Clear Session"):
+            clear_session_response = requests.post(f"{api_url}/clear_sessions/")
+            if clear_session_response.status_code == 200:
+                st.sidebar.success("Session cleared successfully!")
+                st.session_state["session_active"] = False
+                st.session_state["quiz_visible"] = False
+            else:
+                st.sidebar.error("Failed to clear session.")
 
-    # خطوة 2: إدخال السؤال
-    query = st.text_input("اكتب سؤالك هنا:")
-    if st.button("الحصول على إجابة"):
-        query_request = {
-            "query": query,
-            "optional_param": ""
-        }
-        payload = {
-            "query_request": json.dumps(query_request),
-            "courseId": st.session_state["course_id"],
-            "studentId": STUDENT_ID
-        }
+        # Main area for active session features
+if st.session_state.get("session_active", False):
+    # Chat feature
+    st.markdown("### Chat with the Bot")
+    query = st.text_area("Ask a question:")
+    
+    # Always show the Submit Query button
+    submit_query_button = st.button("Submit Query")
 
-        response = requests.post(f"{BASE_URL}/query/", data=payload)
-        if response.status_code == 200:
-            answer = response.json().get("response", "")
-            st.markdown(f"<div class='rtl-text'>الإجابة:</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='rtl-text'>{answer}</div>", unsafe_allow_html=True)
-            st.session_state["last_response"] = answer
+    if submit_query_button and query:
+        query_response = requests.post(
+            f"{api_url}/query/",
+            data={
+                "studentId": student_id,
+                "courseId": course_id,
+                "query_request": '{"query": "' + query + '"}',
+            },
+        )
+        if query_response.status_code == 200:
+            response_text = query_response.json().get("response", "No response")
+            st.write("Bot Response:", response_text)
+
         else:
-            st.error(response.json().get("detail", "حدث خطأ أثناء الاستفسار."))
+            st.error("Failed to submit query. Please try again.")
+            st.error(f"Error Details: {query_response.json().get('detail', 'Unknown error')}")
 
-    # خطوة 3: توليد اختبار (مخفي حتى الضغط على زر إظهار الاختبار)
-    if "last_response" in st.session_state:
-        if st.button("عرض قسم الاختبار"):
-            st.session_state["quiz_visible"] = True
+    elif submit_query_button and not query:
+        st.warning("Please enter a question before submitting.")
 
-    # عرض قسم الاختبار فقط إذا تم الضغط على الزر
+    # Display quiz options only if quiz_visible is True
     if st.session_state.get("quiz_visible", False):
-        st.markdown("<div class='rtl-text'>توليد اختبار:</div>", unsafe_allow_html=True)
-        question_type = st.selectbox("اختر نوع الأسئلة:", ["MCQ", "TF"])
-        num_questions = st.slider("عدد الأسئلة:", min_value=1, max_value=10, value=5)
+        st.markdown("### Configure Quiz Options")
+        question_type = st.selectbox("Choose question type:", ["MCQ", "TF"])
+        num_questions = st.number_input(
+            "Number of questions:", min_value=1, max_value=50, value=10
+        )
 
-        if st.button("توليد الاختبار"):
+        # Submit quiz request
+        if st.button("Generate Quiz"):
             quiz_payload = {
-                "courseId": st.session_state["course_id"],
-                "studentId": STUDENT_ID,
+                "studentId": student_id,
+                "courseId": course_id,
                 "question_type": question_type,
-                "num_questions": num_questions
+                "num_questions": num_questions,
             }
+            quiz_response = requests.post(f"{api_url}/quiz/", data=quiz_payload)
 
-            quiz_response = requests.post(f"{BASE_URL}/quiz/", data=quiz_payload)
             if quiz_response.status_code == 200:
                 questions = quiz_response.json().get("questions", [])
-                st.success("تم توليد الاختبار بنجاح!")
+                st.success("Quiz generated successfully!")
                 for i, question in enumerate(questions, start=1):
-                    st.markdown(f"<div class='rtl-text'>س{str(i)}: {question['question']}</div>", unsafe_allow_html=True)
-                    for choice in question['choices']:
-                        st.markdown(f"<div class='rtl-text'>- {choice}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='rtl-text'>الإجابة الصحيحة: {question['correct answer']}</div>", unsafe_allow_html=True)
+                    st.markdown(f"**Q{i}: {question.get('question')}**")
+                    for choice in question.get("choices", []):
+                        st.markdown(f"- {choice}")
+                    if question_type == "TF":
+                        correct_answer = question.get('correctAnswer', 'None')  # For TF
+                    else:  # For MCQ
+                        correct_answer = question.get('correct answer', 'None')
+                    st.markdown(f"**Correct Answer:** {correct_answer}")
             else:
-                st.error("فشل في توليد الاختبار.")
-
-# خطوة 4: مسح الجلسات (اختياري)
-if st.sidebar.button("مسح الجلسات"):
-    clear_response = requests.post(f"{BASE_URL}/clear_sessions/")
-    if clear_response.status_code == 200:
-        st.success("تم مسح جميع الجلسات بنجاح!")
-        st.session_state.clear()
-    else:
-        st.error("فشل في مسح الجلسات.")
-
-st.sidebar.header(":طريقة الاستخدام")
-# الشريط الجانبي - إرشادات الاستخدام والتنويه
-st.sidebar.markdown("""
-<div class='sidebar-rtl'>
-- اختر المادة المطلوبة من الصفحة الرئيسية.<br>
-- اكتب سؤالك للحصول على الإجابة.<br>
-- يمكنك توليد اختبار يحتوي على أسئلة متنوعة بعد الاستفسار.<br>
-- استخدم زر "مسح الجلسات" لإعادة تعيين الجلسة إذا لزم الأمر.<br>
-- **تنويه:** هذه النسخة تجريبية ومقدمة من EduAi لتقييم الأداء وتقديم الملاحظات.
-</div>
-""", unsafe_allow_html=True)
-
-
+                st.error("Failed to generate quiz. Please try again.")
+                st.error(f"Error Details: {quiz_response.json().get('detail', 'Unknown error')}")
