@@ -111,10 +111,8 @@ if st.session_state.get("session_active", False):
                     st.markdown(f"**Q{i}: {question.get('question')}**")
                     for choice in question.get("choices", []):
                         st.markdown(f"- {choice}")
-                    if question_type == "TF":
-                        correct_answer = question.get('correctAnswer', 'None')  # For TF
-                    else:  # For MCQ
-                        correct_answer = question.get('correct answer', 'None')
+              
+                    correct_answer = question.get('correct answer', 'None')
                     st.markdown(f"**Correct Answer:** {correct_answer}")
             else:
                 st.error("Failed to generate quiz. Please try again.")
