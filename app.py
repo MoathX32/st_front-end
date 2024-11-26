@@ -11,7 +11,7 @@ API_ENDPOINTS = {
 COURSE_IDS = {
     "Arabic":491,
     "English":609,
-    "French":610,
+    "French":612,
 }
 
 # Streamlit app starts here
