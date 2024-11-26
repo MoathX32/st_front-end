@@ -9,7 +9,7 @@ API_ENDPOINTS = {
 }
 
 COURSE_IDS = {
-    "Arabic":314,
+    "Arabic":491,
     "English":609,
     "French":610,
 }
